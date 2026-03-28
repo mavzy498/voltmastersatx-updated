@@ -31,6 +31,17 @@ function formatLabel(val: string): string {
   return labels[val] ?? val;
 }
 
+function formatPhone(raw: string): string {
+  const digits = raw.replace(/\D/g, '');
+  if (digits.length === 10) {
+    return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+  }
+  if (digits.length === 11 && digits[0] === '1') {
+    return `(${digits.slice(1, 4)}) ${digits.slice(4, 7)}-${digits.slice(7)}`;
+  }
+  return raw; // return as-is if unrecognised format
+}
+
 // ─── Route Handler ────────────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
   try {
@@ -69,37 +80,101 @@ export async function POST(req: NextRequest) {
     // ── 2. Send notification email via Resend ────────────────────────────────
     try {
       const resend = new Resend(process.env.RESEND_API_KEY);
+      const formattedPhone = formatPhone(phone);
 
       await resend.emails.send({
         from: 'VoltMasters ATX <noreply@voltmastersatx.com>',
         to: process.env.NOTIFICATION_EMAIL ?? 'info@voltmastersatx.com',
-        subject: `🔌 New Quote Request — ${name}`,
+        subject: `⚡ New Quote Request — ${name}`,
         html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <div style="background: #0a0a0a; padding: 24px 32px; border-radius: 12px 12px 0 0;">
-              <h1 style="color: #FCD34D; font-size: 22px; margin: 0;">New Quote Request</h1>
-              <p style="color: #a1a1aa; margin: 6px 0 0;">VoltMasters ATX · voltmastersatx.com</p>
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border-radius: 14px; overflow: hidden; border: 1px solid #27272a;">
+
+            <!-- Header with logo -->
+            <div style="background: #0a0a0a; padding: 24px 32px;">
+              <table style="border-collapse: collapse; width: 100%;">
+                <tr>
+                  <td style="vertical-align: middle;">
+                    <table style="border-collapse: collapse;">
+                      <tr>
+                        <td style="vertical-align: middle; padding-right: 10px;">
+                          <div style="width: 32px; height: 32px; background: #FCD34D; border-radius: 50%; text-align: center; line-height: 32px; font-size: 18px; font-weight: 900; color: #0a0a0a;">⚡</div>
+                        </td>
+                        <td style="vertical-align: middle;">
+                          <span style="font-size: 20px; font-weight: 900; color: #ffffff; letter-spacing: 0.02em;">VOLT<span style="color: #FCD34D;">MASTERS</span></span>
+                          <span style="color: #52525b; font-size: 13px; font-weight: 400; margin-left: 6px;">ATX</span>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                  <td style="text-align: right; vertical-align: middle;">
+                    <span style="background: #FCD34D; color: #0a0a0a; font-size: 11px; font-weight: 800; padding: 4px 12px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.05em;">New Lead</span>
+                  </td>
+                </tr>
+              </table>
             </div>
-            <div style="background: #f9fafb; padding: 32px; border: 1px solid #e4e4e7; border-top: none; border-radius: 0 0 12px 12px;">
 
-              <h2 style="font-size: 16px; color: #18181b; margin: 0 0 16px;">Contact Info</h2>
-              <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
-                <tr><td style="padding: 8px 0; color: #71717a; width: 140px;">Name</td><td style="padding: 8px 0; font-weight: 600; color: #18181b;">${name}</td></tr>
-                <tr><td style="padding: 8px 0; color: #71717a;">Email</td><td style="padding: 8px 0;"><a href="mailto:${email}" style="color: #FCD34D;">${email}</a></td></tr>
-                <tr><td style="padding: 8px 0; color: #71717a;">Phone</td><td style="padding: 8px 0;"><a href="tel:${phone.replace(/\D/g, '')}" style="color: #FCD34D;">${phone}</a></td></tr>
+            <!-- Alert strip -->
+            <div style="background: #18181b; padding: 12px 32px; border-bottom: 1px solid #27272a;">
+              <p style="margin: 0; color: #a1a1aa; font-size: 13px;">New quote request submitted — <strong style="color: #ffffff;">follow up within a few hours</strong></p>
+            </div>
+
+            <!-- Body -->
+            <div style="background: #f9fafb; padding: 28px 32px;">
+
+              <!-- Contact Info -->
+              <p style="font-size: 11px; font-weight: 700; color: #71717a; letter-spacing: 0.1em; text-transform: uppercase; margin: 0 0 10px;">Contact Info</p>
+              <table style="width: 100%; border-collapse: collapse; background: #ffffff; border-radius: 10px; overflow: hidden; margin-bottom: 20px; border: 1px solid #e4e4e7;">
+                <tr style="border-bottom: 1px solid #f4f4f5;">
+                  <td style="padding: 11px 16px; color: #71717a; font-size: 13px; width: 110px;">Name</td>
+                  <td style="padding: 11px 16px; font-weight: 700; color: #18181b; font-size: 14px;">${name}</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #f4f4f5;">
+                  <td style="padding: 11px 16px; color: #71717a; font-size: 13px;">Email</td>
+                  <td style="padding: 11px 16px; font-size: 14px;"><a href="mailto:${email}" style="color: #2563eb; text-decoration: none;">${email}</a></td>
+                </tr>
+                <tr>
+                  <td style="padding: 11px 16px; color: #71717a; font-size: 13px;">Phone</td>
+                  <td style="padding: 11px 16px; font-size: 14px;"><a href="tel:+1${phone.replace(/\D/g, '')}" style="color: #2563eb; font-weight: 700; text-decoration: none;">${formattedPhone}</a></td>
+                </tr>
               </table>
 
-              <h2 style="font-size: 16px; color: #18181b; margin: 0 0 16px;">Job Details</h2>
-              <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
-                <tr><td style="padding: 8px 0; color: #71717a; width: 200px;">Charger Location</td><td style="padding: 8px 0; font-weight: 600; color: #18181b;">${formatLabel(garageType)}</td></tr>
-                <tr><td style="padding: 8px 0; color: #71717a;">Panel Distance</td><td style="padding: 8px 0; font-weight: 600; color: #18181b;">${formatLabel(panelDistance)}</td></tr>
-                <tr><td style="padding: 8px 0; color: #71717a;">Panel Size</td><td style="padding: 8px 0; font-weight: 600; color: #18181b;">${formatLabel(panelSize)}</td></tr>
-                ${message ? `<tr><td style="padding: 8px 0; color: #71717a; vertical-align: top;">Notes</td><td style="padding: 8px 0; color: #18181b;">${message}</td></tr>` : ''}
+              <!-- Job Details -->
+              <p style="font-size: 11px; font-weight: 700; color: #71717a; letter-spacing: 0.1em; text-transform: uppercase; margin: 0 0 10px;">Job Details</p>
+              <table style="width: 100%; border-collapse: collapse; background: #ffffff; border-radius: 10px; overflow: hidden; margin-bottom: 24px; border: 1px solid #e4e4e7;">
+                <tr style="border-bottom: 1px solid #f4f4f5;">
+                  <td style="padding: 11px 16px; color: #71717a; font-size: 13px; width: 160px;">Charger location</td>
+                  <td style="padding: 11px 16px; font-weight: 600; color: #18181b; font-size: 14px;">${formatLabel(garageType)}</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #f4f4f5;">
+                  <td style="padding: 11px 16px; color: #71717a; font-size: 13px;">Panel distance</td>
+                  <td style="padding: 11px 16px; font-weight: 600; color: #18181b; font-size: 14px;">${formatLabel(panelDistance)}</td>
+                </tr>
+                <tr${message ? ' style="border-bottom: 1px solid #f4f4f5;"' : ''}>
+                  <td style="padding: 11px 16px; color: #71717a; font-size: 13px;">Panel size</td>
+                  <td style="padding: 11px 16px; font-weight: 600; color: #18181b; font-size: 14px;">${formatLabel(panelSize)}</td>
+                </tr>
+                ${message ? `<tr><td style="padding: 11px 16px; color: #71717a; font-size: 13px; vertical-align: top;">Notes</td><td style="padding: 11px 16px; color: #18181b; font-size: 14px;">${message}</td></tr>` : ''}
               </table>
 
-              <div style="background: #FCD34D; padding: 16px 20px; border-radius: 8px; text-align: center;">
-                <p style="margin: 0; font-weight: 700; color: #0a0a0a; font-size: 15px;">Follow up within a few hours — call or text ${phone}</p>
+              <!-- CTA -->
+              <div style="background: #0a0a0a; border-radius: 10px; padding: 18px 24px; display: flex; align-items: center; justify-content: space-between;">
+                <table style="border-collapse: collapse; width: 100%;">
+                  <tr>
+                    <td style="vertical-align: middle;">
+                      <p style="margin: 0 0 3px; color: #71717a; font-size: 12px;">Call or text to follow up</p>
+                      <p style="margin: 0; color: #FCD34D; font-size: 20px; font-weight: 900;">${formattedPhone}</p>
+                    </td>
+                    <td style="text-align: right; vertical-align: middle;">
+                      <a href="tel:+1${phone.replace(/\D/g, '')}" style="background: #FCD34D; color: #0a0a0a; font-size: 13px; font-weight: 800; padding: 10px 20px; border-radius: 8px; text-decoration: none; display: inline-block;">Call now</a>
+                    </td>
+                  </tr>
+                </table>
               </div>
+            </div>
+
+            <!-- Footer -->
+            <div style="background: #0a0a0a; padding: 14px 32px; text-align: center; border-top: 1px solid #27272a;">
+              <p style="color: #52525b; font-size: 11px; margin: 0;">VoltMasters ATX &nbsp;·&nbsp; voltmastersatx.com &nbsp;·&nbsp; (512) 537-5145</p>
             </div>
           </div>
         `,
@@ -112,28 +187,47 @@ export async function POST(req: NextRequest) {
     // ── 3. Send confirmation email to customer ───────────────────────────────
     try {
       const resend = new Resend(process.env.RESEND_API_KEY);
+      const formattedPhone = formatPhone(phone);
 
       await resend.emails.send({
         from: 'VoltMasters ATX <noreply@voltmastersatx.com>',
         to: email,
         subject: 'We got your quote request!',
         html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <div style="background: #0a0a0a; padding: 24px 32px; border-radius: 12px 12px 0 0;">
-              <h1 style="color: #FCD34D; font-size: 22px; margin: 0;">VoltMasters ATX</h1>
-              <p style="color: #a1a1aa; margin: 6px 0 0;">Austin's #1 EV Charger Installer</p>
-            </div>
-            <div style="background: #f9fafb; padding: 32px; border: 1px solid #e4e4e7; border-top: none; border-radius: 0 0 12px 12px;">
-              <h2 style="color: #18181b; margin: 0 0 12px;">Hi ${name.split(' ')[0]}, we've got your request!</h2>
-              <p style="color: #52525b; line-height: 1.6; margin: 0 0 20px;">Thanks for reaching out. We'll call or text you at <strong>${phone}</strong> within a few hours to go over your quote.</p>
-              <p style="color: #52525b; line-height: 1.6; margin: 0 0 24px;">Most quotes are clear, all-in prices — charger, install, and rebate filing included. No surprises.</p>
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border-radius: 14px; overflow: hidden; border: 1px solid #27272a;">
 
-              <div style="background: #0a0a0a; padding: 16px 20px; border-radius: 8px; margin-bottom: 24px;">
-                <p style="margin: 0; color: #a1a1aa; font-size: 14px;">Questions? Reach us directly:</p>
-                <p style="margin: 6px 0 0; color: #FCD34D; font-weight: 700; font-size: 16px;">(512) 537-5145</p>
+            <!-- Header -->
+            <div style="background: #0a0a0a; padding: 24px 32px;">
+              <table style="border-collapse: collapse;">
+                <tr>
+                  <td style="vertical-align: middle; padding-right: 10px;">
+                    <div style="width: 32px; height: 32px; background: #FCD34D; border-radius: 50%; text-align: center; line-height: 32px; font-size: 18px; font-weight: 900; color: #0a0a0a;">⚡</div>
+                  </td>
+                  <td style="vertical-align: middle;">
+                    <span style="font-size: 20px; font-weight: 900; color: #ffffff; letter-spacing: 0.02em;">VOLT<span style="color: #FCD34D;">MASTERS</span></span>
+                    <span style="color: #52525b; font-size: 13px; font-weight: 400; margin-left: 6px;">ATX</span>
+                  </td>
+                </tr>
+              </table>
+            </div>
+
+            <!-- Body -->
+            <div style="background: #f9fafb; padding: 32px; border: 1px solid #e4e4e7; border-top: none;">
+              <h2 style="color: #18181b; margin: 0 0 8px; font-size: 22px;">Hi ${name.split(' ')[0]}, we&apos;ve got your request!</h2>
+              <p style="color: #52525b; line-height: 1.7; margin: 0 0 16px; font-size: 15px;">Thanks for reaching out. We&apos;ll call or text you at <strong style="color: #18181b;">${formattedPhone}</strong> within a few hours to go over your quote.</p>
+              <p style="color: #52525b; line-height: 1.7; margin: 0 0 28px; font-size: 15px;">Your quote will be a clear, all-in price — charger, install, and Austin Energy rebate filing included. No surprises.</p>
+
+              <div style="background: #0a0a0a; padding: 20px 24px; border-radius: 10px; margin-bottom: 24px;">
+                <p style="margin: 0 0 4px; color: #71717a; font-size: 13px;">Questions? Reach us directly:</p>
+                <p style="margin: 0; color: #FCD34D; font-weight: 900; font-size: 20px;">(512) 537-5145</p>
               </div>
 
-              <p style="color: #a1a1aa; font-size: 12px; margin: 0;">You're receiving this because you submitted a quote request at voltmastersatx.com</p>
+              <p style="color: #a1a1aa; font-size: 12px; margin: 0; line-height: 1.6;">You&apos;re receiving this because you submitted a quote request at voltmastersatx.com. We&apos;ll only contact you about your installation.</p>
+            </div>
+
+            <!-- Footer -->
+            <div style="background: #0a0a0a; padding: 14px 32px; text-align: center; border-top: 1px solid #27272a;">
+              <p style="color: #52525b; font-size: 11px; margin: 0;">VoltMasters ATX &nbsp;·&nbsp; voltmastersatx.com &nbsp;·&nbsp; (512) 537-5145</p>
             </div>
           </div>
         `,
