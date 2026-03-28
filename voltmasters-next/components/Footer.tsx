@@ -98,9 +98,9 @@ export function Footer() {
             </div>
             <p className="text-xs text-zinc-600">
               © {new Date().getFullYear()} Voltmasters ATX ·{' '}
-              <a href="#" className="hover:text-zinc-400 transition-colors">Privacy</a>
+              <a href="/privacy" className="hover:text-zinc-400 transition-colors">Privacy</a>
               {' · '}
-              <a href="#" className="hover:text-zinc-400 transition-colors">Terms</a>
+              <a href="/terms" className="hover:text-zinc-400 transition-colors">Terms</a>
             </p>
           </div>
         </div>
