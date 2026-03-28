@@ -21,7 +21,7 @@ export default function PrivacyPolicy() {
       </div>
 
       {/* Content */}
-      <div className="max-w-3xl mx-auto px-5 py-16 prose prose-zinc max-w-none">
+      <div className="max-w-3xl mx-auto px-5 py-16">
 
         <p className="text-zinc-600 text-lg leading-relaxed">
           VoltMasters ATX ("we," "us," or "our") operates voltmastersatx.com. This Privacy Policy explains how we collect, use, and protect your personal information when you use our website or request a quote.
@@ -29,7 +29,7 @@ export default function PrivacyPolicy() {
 
         <h2 className="text-2xl font-bold text-zinc-900 mt-10 mb-4">1. Information We Collect</h2>
         <p className="text-zinc-600 leading-relaxed">When you submit a quote request, we collect:</p>
-        <ul className="text-zinc-600 space-y-2 mt-3">
+        <ul className="list-disc list-inside text-zinc-600 space-y-2 mt-3">
           <li>Full name</li>
           <li>Email address</li>
           <li>Phone number</li>
@@ -42,7 +42,7 @@ export default function PrivacyPolicy() {
 
         <h2 className="text-2xl font-bold text-zinc-900 mt-10 mb-4">2. How We Use Your Information</h2>
         <p className="text-zinc-600 leading-relaxed">We use your information solely to:</p>
-        <ul className="text-zinc-600 space-y-2 mt-3">
+        <ul className="list-disc list-inside text-zinc-600 space-y-2 mt-3">
           <li>Contact you with a quote for EV charger installation services</li>
           <li>Schedule and complete your installation</li>
           <li>File your Austin Energy rebate paperwork on your behalf</li>
@@ -65,7 +65,7 @@ export default function PrivacyPolicy() {
 
         <h2 className="text-2xl font-bold text-zinc-900 mt-10 mb-4">5. Third-Party Services</h2>
         <p className="text-zinc-600 leading-relaxed">We use the following third-party services to operate our website:</p>
-        <ul className="text-zinc-600 space-y-2 mt-3">
+        <ul className="list-disc list-inside text-zinc-600 space-y-2 mt-3">
           <li><strong>Vercel</strong> — website hosting</li>
           <li><strong>Resend</strong> — email delivery</li>
           <li><strong>Airtable</strong> — lead data storage</li>
@@ -77,7 +77,7 @@ export default function PrivacyPolicy() {
 
         <h2 className="text-2xl font-bold text-zinc-900 mt-10 mb-4">6. Your Rights</h2>
         <p className="text-zinc-600 leading-relaxed">You have the right to:</p>
-        <ul className="text-zinc-600 space-y-2 mt-3">
+        <ul className="list-disc list-inside text-zinc-600 space-y-2 mt-3">
           <li>Request access to the personal data we hold about you</li>
           <li>Request correction of inaccurate data</li>
           <li>Request deletion of your data</li>
